@@ -19,7 +19,6 @@ class Head extends Component {
           style={{ lineHeight: '64px' }}
         >
           <Menu.Item key="1"><Link to="/">首页</Link></Menu.Item>
-          <Menu.Item key="2"><Link to="/Article">文章</Link></Menu.Item>
         </Menu>
       </Header>
     )

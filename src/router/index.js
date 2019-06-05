@@ -5,7 +5,6 @@ import { Layout, Menu, Breadcrumb } from 'antd';
 const { Header, Content, Footer } = Layout;
 
 import Head from '../pages/Layout/Head/index.js'
-import Article from '../pages/Article';
 import Home from '../pages/Home';
 
 const getRouter = () => (
@@ -15,13 +14,10 @@ const getRouter = () => (
       <Content style={{ padding: '0 50px', marginTop: 64 }}>
         <Breadcrumb style={{ margin: '16px 0' }}>
           <Breadcrumb.Item>Home</Breadcrumb.Item>
-          <Breadcrumb.Item>List</Breadcrumb.Item>
-          <Breadcrumb.Item>App</Breadcrumb.Item>
         </Breadcrumb>
         <div style={{ background: '#fff', padding: 24, minHeight: 1580 }}>
           <Switch>
             <Route exact path="/" component={Home} />
-            <Route path="/Article" component={Article} />
           </Switch>
         </div>
       </Content>
