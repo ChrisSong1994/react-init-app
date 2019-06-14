@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Tree,Button,Icon } from 'antd'
+import { Tree, Button, Icon } from 'antd'
 import { observer, inject } from "mobx-react"
 
 const DirectoryTree = Tree.DirectoryTree;
@@ -82,7 +82,7 @@ class Home extends Component {
     render() {
         const { background } = this.props.globleStore
         return (
-            <div style={{background}}>
+            <div style={{ background }}>
                 <DirectoryTree
                     multiple
                     onSelect={this.onSelect.bind(this)}

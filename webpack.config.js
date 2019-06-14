@@ -86,7 +86,14 @@ let config = {
     ],
     resolve: {
         alias: {
-            'src': path.join(__dirname, './src'),
+            src: path.join(__dirname, './src'),
+            assets: path.join(__dirname, 'src/assets'),
+            api: path.join(__dirname, 'src/api'),
+            pages: path.join(__dirname, 'src/pages'),
+            utils: path.join(__dirname, 'src/utils'),
+            components: path.join(__dirname, 'src/components'),
+            http: path.join(__dirname, 'src/http'),
+            store: path.join(__dirname, 'src/store'),
         },
         extensions: ['.tsx', '.ts', '.js', '.css', '.json', '.less', '.scss']
     },
