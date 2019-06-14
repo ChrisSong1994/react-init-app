@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import { Tree,Button,Icon } from 'antd'
+import { observer, inject } from "mobx-react"
 
 const DirectoryTree = Tree.DirectoryTree;
 const { TreeNode } = Tree;
-export default class Home extends Component {
+
+@inject("globleStore")
+@observer
+class Home extends Component {
     constructor() {
         super()
         this.state = {
@@ -44,7 +48,7 @@ export default class Home extends Component {
 
     renderTreeNode = (parentId) => {
         // 先找到子级节点
-        var tmp = this.getByParentId(parentId);
+        let tmp = this.getByParentId(parentId);
         if (tmp.length > 0) {
             // 遍历铺页面，如果数组长度不为0则证明子级不为空
             return tmp.map(item => {
@@ -76,12 +80,13 @@ export default class Home extends Component {
     }
 
     render() {
+        const { background } = this.props.globleStore
         return (
-            <div>
+            <div style={{background}}>
                 <DirectoryTree
                     multiple
                     onSelect={this.onSelect.bind(this)}
- >
+                >
                     {this.renderTreeNode("-1")}
                 </DirectoryTree>
 
@@ -93,3 +98,5 @@ export default class Home extends Component {
         )
     }
 }
+
+export default Home

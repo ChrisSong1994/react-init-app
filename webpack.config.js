@@ -1,111 +1,97 @@
-const path = require('path');
+const path = require('path')
 const webpack = require('webpack')
-
 const HtmlWebpackPlugin = require('html-webpack-plugin');// html 模版插件
-const ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');// 拆分css样式的插件
-const CleanWebpackPlugin = require('clean-webpack-plugin');// 清理模块
+const yargsParser = require('yargs-parser') //yargs-parser 模块用来获取命令行参数
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;  // 包依赖可视化
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");// 拆分css样式的插件
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');  // css 优化
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')  // js 优化
 
-const argv = require('yargs-parser')(process.argv.slice(2));  //  yargs-parser 模块用来获取命令行参数
-const pro = argv.mode == 'production' ? true : false;  //  区别是生产环境和开发环境
+const argv = yargsParser(process.argv.slice(2));   // cross-env：运行跨平台设置和使用环境变量的脚本
+// console.log(argv)  //{ _: [], open: true, mode: 'development' }
+const devMode = argv.mode == 'development' ? true : false;  //  区别是生产环境和开发环境
 
-let plu = [];
-if (pro) {
-    //  线上环境
-    plu.push(
-        new HtmlWebpackPlugin({
-            template: './src/index.html',
-            hash: true, // 会在打包好的bundle.js后面加上hash串
-            chunks: ['vendor', 'index']  //  引入需要的chunk
-        }),
-        // 拆分后会把css文件放到dist目录下的css/style.css
-        new ExtractTextWebpackPlugin('css/[name].[chunkhash].css'),
-        new CleanWebpackPlugin('dist'),
-    )
-} else {
-    //  开发环境
-    plu.push(
-        new HtmlWebpackPlugin({
-            template: './src/index.html',
-            chunks: ['vendor', 'index']  //  引入需要的chunk
-        }),
-        // 拆分后会把css文件放到dist目录下的css/style.css
-        new ExtractTextWebpackPlugin('css/[name].[chunkhash].css'),
-        new webpack.HotModuleReplacementPlugin(),  // 热更新，热更新不是刷新
-    )
-}
+let plugins = devMode ? [
+    // development
+    new webpack.HotModuleReplacementPlugin()  // 热更新，热更新不是刷新
+] : [
+    // production
+    new BundleAnalyzerPlugin(), // 包依赖可视化
+]
 
-module.exports = {
+let config = {
     entry: {
-        index: './src/index.js',    // 入口文件
+        index: './index.js',    // 入口文件
     },
     output: {
-        filename: pro ? '[name].[chunkhash].js' : '[name].js', // 打包后的文件名称
+        filename: devMode ? '[name].js' : '[name].[chunkhash].js', // 打包后的文件名称
         path: path.resolve('dist'), // 打包后的目录，必须是绝对路径
-        publicPath: '/',
+        publicPath: '/', // 打包的根目录下
     },
     module: {
         rules: [
             {
                 test: /\.less$/,
-                use: ExtractTextWebpackPlugin.extract({
-                    fallback: "style-loader",
-                    use: ['css-loader', 'postcss-loader', 'less-loader'] // 从右向左解析
-                })
+                use: [
+                    devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader', 'postcss-loader', 'less-loader'] // 从右向左解析
             },
             {
                 test: /\.scss$/,
-                use: ExtractTextWebpackPlugin.extract({
-                    fallback: "style-loader",
-                    use: ['css-loader', 'postcss-loader', 'sass-loader']
-                })
+                use: [
+                    devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader', 'postcss-loader', 'sass-loader']
             },
             {
                 test: /\.css$/,
-                use: ExtractTextWebpackPlugin.extract({
-                    fallback: "style-loader",
-                    use: ['css-loader', 'postcss-loader']
-                })
+                use: [
+                    devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader', 'postcss-loader']
             },
             {
-                test: /\.(jpe?g|png|gif)$/,
+                test: /\.(png|jpg|gif|woff|woff2|eot|ttf|otf)$/,
+                use: ['file-loader']
+            },
+            {    // babel es6转 es5
+                test: /\.js$/,
+                exclude: /node_modules/,
                 use: [
                     {
-                        loader: 'url-loader',
+                        loader: 'babel-loader',
                         options: {
-                            limit: 8192, // 小于8k的图片自动转成base64格式，并且不会存在实体图片
-                            outputPath: 'images/', // 图片打包后存放的目录
-                        },
-                    },
-                ],
+                            presets: ['@babel/preset-env', '@babel/preset-react']
+                        }
+                    }
+                ]
             },
             {
-                test: /\.(htm|html)$/,
-                use: 'html-withimg-loader', // 打包页面img引用图片
-            },
-            {
-                test: /\.(eot|ttf|woff|svg)$/,  //字体图标和svg图片都可以通过file-loader来解析
-                use: 'file-loader'
-            },
-            {
-                test: /\.js$/,
-                use: 'babel-loader',
-                include: /src/,          // 只转化src目录下的js
-                exclude: /node_modules/  // 排除掉node_modules，优化打包速度
+                test: /\.(js|jsx)$/,
+                enforce: 'pre',
+                loader: 'eslint-loader',
+                include: path.resolve(__dirname, './src/**/*.js'),
+                exclude: /node_modules/
             }
         ]
     },
-    plugins: plu,
+    plugins: [
+        ...plugins,
+        new HtmlWebpackPlugin({
+            template: './index.html',
+            hash: true // 会在打包好的bundle.js后面加上hash串
+        }),
+        new MiniCssExtractPlugin({
+            filename: devMode ? 'css/[name].css' : 'css/[name].[hash].css',
+            chunkFilename: devMode ? 'css/[id].css' : 'css/[id].[hash].css',
+        })
+    ],
     resolve: {
-        // 别名
         alias: {
-            assets: path.join(__dirname, 'src/assets'),
-            api: path.join(__dirname, 'src/api'),
+            'src': path.join(__dirname, './src'),
         },
-        // 省略后缀
-        extensions: ['.js', '.jsx', '.json', '.css', '.scss', '.less']
+        extensions: ['.tsx', '.ts', '.js', '.css', '.json', '.less', '.scss']
     },
     devServer: {
-        port: 7000,             // 端口
+        port: 8088,             // 端口
         open: true,             // 自动打开浏览器
         hot: true,               // 开启热更新
         overlay: true, // 浏览器页面上显示错误
@@ -118,16 +104,9 @@ module.exports = {
                 pathRewrite: {
                     '^/api': '/api'
                 }
-            },
-            '/files': {    // 静态文件图片等
-                target: 'http://localhost:4000', // 服务端
-                changeOrigin: true,
-                ws: true,
-                pathRewrite: {
-                    '^/files': '/files'
-                }
             }
         }
+
     },
     //  提取公共代码
     optimization: {
@@ -141,8 +120,42 @@ module.exports = {
                     priority: 10,
                 }
             }
-        }
+        },
+        minimizer: [
+            // 自定义js优化配置，将会覆盖默认配置
+            new UglifyJsPlugin({
+                exclude: /\.min\.js$/, // 过滤掉以".min.js"结尾的文件，我们认为这个后缀本身就是已经压缩好的代码，没必要进行二次压缩
+                cache: true,
+                parallel: true, // 开启并行压缩，充分利用cpu
+                sourceMap: false,
+                extractComments: false, // 移除注释
+                uglifyOptions: {
+                    compress: {
+                        unused: true,
+                        drop_debugger: true
+                    },
+                    output: {
+                        comments: false
+                    }
+                }
+            }),
+            // 用于优化css文件
+            new OptimizeCssAssetsPlugin({
+                assetNameRegExp: /\.css$/g,
+                cssProcessorOptions: {
+                    safe: true,
+                    autoprefixer: { disable: true }, // 这里是个大坑，禁用掉cssnano对于浏览器前缀的处理。
+                    mergeLonghand: false,
+                    discardComments: {
+                        removeAll: true // 移除注释
+                    }
+                },
+                canPrint: true
+            })
+        ]
     },
     //srouce里面能看到我们写的代码，也能打断点调试代码
-    devtool: pro ? '' : 'inline-source-map'
+    devtool: devMode ? 'inline-source-map' : ''
 }
+
+module.exports = config
