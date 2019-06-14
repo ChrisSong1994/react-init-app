@@ -13,7 +13,7 @@ class Head extends Component {
   }
 
   componentDidMount() {
-    const path = this.props.match.path
+    const path = this.props.location.pathname
     this.mathPath(path)
   }
 
