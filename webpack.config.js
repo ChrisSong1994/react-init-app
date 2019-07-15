@@ -98,6 +98,7 @@ let config = {
         extensions: ['.tsx', '.ts', '.js', '.css', '.json', '.less', '.scss']
     },
     devServer: {
+        contentBase: './dist',  // 开启服务的文件夹
         port: 8088,             // 端口
         open: true,             // 自动打开浏览器
         hot: true,               // 开启热更新
