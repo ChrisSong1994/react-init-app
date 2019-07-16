@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from 'react-dom';
-import './src/assets/style/index.scss'; // 引入css
+import './assets/style/index.scss'; // 引入css
 import 'antd/dist/antd.css';
-import App from './src/router';
+import App from './router';
 import { Provider } from "mobx-react"
-import { stores } from "./src/store"
+import { stores } from "./store"
 /* 初始化 */
 
 ReactDOM.render(
