@@ -5,7 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 let config = {
     entry: {
-        index: './src/index.js',    // 入口文件
+        index: './src/index.tsx',    // 入口文件
     },
     module: {
         rules: [
@@ -24,17 +24,9 @@ let config = {
                     }
                 }
             },
-            {    // babel es6转 es5
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: ['babel-loader']
-            },
             {
-                test: /\.(js|jsx)$/,
-                enforce: 'pre',
-                loader: 'eslint-loader',
-                include: path.resolve(__dirname, './src/**/*.js'),
-                exclude: /node_modules/
+                test: /\.tsx?$/,
+                use: ['ts-loader']
             }
         ]
     },

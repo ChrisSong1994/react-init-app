@@ -6,7 +6,7 @@ const baseConfig = require('./webpack.base.js');
 const devConfig = {
     mode: 'development',
     output: {
-        filename: 'js/[name].js' , // 打包后的文件名称
+        filename: 'js/[name].js', // 打包后的文件名称
         path: path.resolve('dist'), // 打包后的目录，必须是绝对路径
         publicPath: '/', // 打包的根目录下
     },
